@@ -1,0 +1,37 @@
+---
+import { formatDate, postUrl, readingTime, type Post } from '../lib/posts';
+import { labels, type Lang } from '../lib/site';
+
+interface Props {
+  posts: Post[];
+  lang: Lang;
+  compact?: boolean;
+  tree?: boolean;
+}
+
+const { posts, lang, compact = false, tree = false } = Astro.props;
+const t = labels[lang];
+---
+
+<div class:list={['post-list', { compact, tree }]}>
+  {posts.map((post, i) => (
+    <article class="post-row">
+      <span class="post-number mono" aria-hidden="true">
+        {tree ? (i === posts.length - 1 ? '└──' : '├──') : String(i + 1).padStart(2, '0')}
+      </span>
+      <a class="post-row-link" href={postUrl(post)}>
+        <div class="post-row-heading">
+          <h3>{post.data.title}</h3>
+          <span class="post-arrow mono" aria-hidden="true">↗</span>
+        </div>
+        <p>{post.data.description}</p>
+        <div class="post-meta mono">
+          <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date, lang)}</time>
+          <span class="meta-dot">·</span>
+          <span>{readingTime(post)} {t.min}</span>
+          {post.data.tags[0] && <span class="row-tag">[{post.data.tags[0]}]</span>}
+        </div>
+      </a>
+    </article>
+  ))}
+</div>

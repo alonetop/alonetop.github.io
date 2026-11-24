@@ -1,0 +1,96 @@
+---
+import Base from '../../layouts/Base.astro';
+import AsciiArt from '../../components/AsciiArt.astro';
+import AsciiBanner from '../../components/AsciiBanner.astro';
+import { labels, languages, localeUrl, otherLang, profile, type Lang } from '../../lib/site';
+
+export function getStaticPaths() {
+  return languages.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Lang;
+const t = labels[lang];
+---
+
+<Base lang={lang} title={t.about} section="about" alternate={localeUrl(otherLang(lang), 'about/')}>
+  <section class="content-shell inner-page panel about-page">
+    <header class="page-heading">
+      <AsciiBanner text="ABOUT" font="block" shadow="single" effect="glint" label="ABOUT" class="page-banner" />
+      <span class="eyebrow mono">~/about · the person behind the blogs</span>
+      <h1>{t.aboutTitle}<span class="title-dot">.</span></h1>
+      <p>{t.aboutIntro}</p>
+    </header>
+
+    <div class="about-layout">
+      <div class="profile-art">
+        <AsciiArt
+          piece="moon-phases"
+          fps={12}
+          mono
+          maxFontSize="10px"
+          caption="still curious · still becoming"
+          class="profile-ascii"
+        />
+      </div>
+
+      <div class="about-body">
+        <span class="eyebrow mono">hello, i'm</span>
+        <h2>{profile.name[lang]}</h2>
+        <p>{profile.about[lang]}</p>
+        <p>{profile.bio[lang]}</p>
+        {profile.demo && <p class="demo-note mono">// {t.demoAbout}</p>}
+      </div>
+    </div>
+
+    <div class="about-details">
+      <section>
+        <h2 class="mono">## {t.interests}</h2>
+        {t.interestItems.map((item, i) => (
+          <p class="interest-item">
+            <span class="mono">0{i + 1}</span>
+            <span>{item}</span>
+          </p>
+        ))}
+      </section>
+
+      <section>
+        <h2 class="mono">## {t.projects}</h2>
+        {profile.projects.map((project) => (
+          <article class="project-item">
+            <h3>
+              {project.url ? (
+                <a class="t-link" href={project.url}>
+                  [{project.name} ↗]
+                </a>
+              ) : (
+                project.name
+              )}
+              {profile.demo && <span class="sample-label mono">[{t.sample}]</span>}
+            </h3>
+            <p>{project.description[lang]}</p>
+          </article>
+        ))}
+      </section>
+    </div>
+
+    {Object.values(profile.social).some(Boolean) && (
+      <div class="social-links mono">
+        {profile.social.github && (
+          <a class="t-link" href={profile.social.github}>
+            [github ↗]
+          </a>
+        )}
+        {profile.social.email && (
+          <a class="t-link" href={`mailto:${profile.social.email}`}>
+            [email ↗]
+          </a>
+        )}
+        {profile.social.mastodon && (
+          <a class="t-link" href={profile.social.mastodon}>
+            [mastodon ↗]
+          </a>
+        )}
+      </div>
+    )}
+  </section>
+</Base>

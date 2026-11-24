@@ -1,0 +1,34 @@
+---
+import { banner, type BannerOptions } from 'ascii.rest/banner';
+
+interface Props extends BannerOptions {
+  text: string;
+  label?: string;
+  class?: string;
+}
+
+const { text, label, class: className, ...options } = Astro.props;
+const piece = banner(text, options);
+const { meta } = piece;
+const cols = meta.cols ?? 40;
+const rows = meta.rows ?? 6;
+const cell = meta.cell ?? 2;
+const stillTime = meta.still ?? 0;
+
+const renderFrame = piece.default();
+const ssrInk = renderFrame(stillTime, { paper: false });
+const optionsJson = Object.keys(options).length ? JSON.stringify(options) : undefined;
+---
+
+<div
+  class:list={['ascii-banner-well', className]}
+  style={`--cols:${cols};--rows:${rows};--cell:${cell}`}
+  data-ascii-banner-text={text}
+  data-ascii-banner-options={optionsJson}
+  data-ascii-label={label ?? meta.name}
+  data-pagefind-ignore
+>
+  <div class="ascii-stage-box" role="img" aria-label={label ?? meta.name} data-ascii-banner-stage>
+    <pre class="ascii-stage ascii-ssr-ink">{ssrInk}</pre>
+  </div>
+</div>

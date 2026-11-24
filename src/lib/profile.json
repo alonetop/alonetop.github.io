@@ -1,0 +1,42 @@
+{
+  "name": {
+    "zh": "掠过古城的风",
+    "en": "Lightdow"
+  },
+  "tagline": {
+    "zh": "记录思考，保持好奇。",
+    "en": "Thinking in the open. Staying curious."
+  },
+  "bio": {
+    "zh": "这里是一处安静的数字花园。收集技术与设计的交点，也记下生活里值得停留的瞬间。",
+    "en": "A quiet corner of the internet. Exploring where technology meets design, and noticing the small things in between."
+  },
+  "about": {
+    "zh": "我喜欢把复杂的事物想清楚，再用简单的方式表达出来。在这里，我写代码、做实验，也记录阅读、散步和日常的观察。",
+    "en": "I like making sense of complicated things and finding simple ways to express them. Here I write code, make experiments, and keep notes on books, walks, and everyday observations."
+  },
+  "social": {
+    "github": "",
+    "email": "",
+    "mastodon": ""
+  },
+  "projects": [
+    {
+      "name": "Field Notes",
+      "description": {
+        "zh": "把零散灵感整理成一座持续生长的数字花园。",
+        "en": "A growing digital garden for small ideas and open questions."
+      },
+      "url": ""
+    },
+    {
+      "name": "Small Experiments",
+      "description": {
+        "zh": "关于生成艺术、网页交互与可视化的小实验。",
+        "en": "Small studies in generative art, interaction, and visualization."
+      },
+      "url": ""
+    }
+  ],
+  "demo": true
+}

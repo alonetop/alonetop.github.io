@@ -1,0 +1,55 @@
+---
+import Base from '../../layouts/Base.astro';
+import PostList from '../../components/PostList.astro';
+import AsciiBanner from '../../components/AsciiBanner.astro';
+import { getPosts, tagUrl } from '../../lib/posts';
+import { labels, languages, localeUrl, otherLang, type Lang } from '../../lib/site';
+
+export function getStaticPaths() {
+  return languages.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Lang;
+const t = labels[lang];
+const posts = await getPosts(lang);
+const tags = [...new Set(posts.flatMap((p) => p.data.tags))];
+const years = [...new Set(posts.map((p) => p.data.date.getUTCFullYear()))];
+---
+
+<Base lang={lang} title={t.archive} section="writing" alternate={localeUrl(otherLang(lang), 'writing/')}>
+  <section class="content-shell inner-page panel">
+    <header class="page-heading">
+      <AsciiBanner text="ARCHIVE" font="block" shadow="single" effect="glint" label="ARCHIVE" class="page-banner" />
+      <span class="eyebrow mono">~/writing · {String(posts.length).padStart(2, '0')} blogs</span>
+      <h1>{t.archive}<span class="title-dot">.</span></h1>
+      <p>{t.archiveIntro}</p>
+    </header>
+
+    <div class="tag-filter mono" aria-label={t.tags}>
+      <span class="filter-label">{t.tags} /</span>
+      {tags.map((tag) => (
+        <a class="tag-chip" href={tagUrl(lang, tag)}>
+          [{tag} <span>{String(posts.filter((p) => p.data.tags.includes(tag)).length).padStart(2, '0')}</span>]
+        </a>
+      ))}
+    </div>
+
+    {years.map((year) => {
+      const yearPosts = posts.filter((p) => p.data.date.getUTCFullYear() === year);
+      return (
+        <section class="year-group">
+          <h2 class="year-title mono">
+            {year}/<span>[{String(yearPosts.length).padStart(2, '0')}]</span>
+          </h2>
+          <PostList posts={yearPosts} lang={lang} tree />
+        </section>
+      );
+    })}
+
+    <div class="archive-end mono">
+      <span class="ascii-rule" aria-hidden="true">─── ✳ ───</span>
+      <p>{t.footer}</p>
+      <a class="t-link" href={localeUrl(lang, 'rss.xml')}>[{t.rss} ↗]</a>
+    </div>
+  </section>
+</Base>

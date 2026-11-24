@@ -1,0 +1,29 @@
+---
+import Base from '../layouts/Base.astro';
+import AsciiArt from '../components/AsciiArt.astro';
+import { labels, localeUrl } from '../lib/site';
+
+const t = labels.zh;
+---
+
+<Base lang="zh" title="404" section="404" noindex>
+  <section class="content-shell not-found panel">
+    <span class="eyebrow mono">404 / an unwritten path</span>
+    <div class="not-found-art-wrap">
+      <AsciiArt
+        piece="not-found"
+        fps={15}
+        mono
+        maxFontSize="12px"
+        label="404 page not found ASCII art"
+        class="not-found-ascii"
+      />
+    </div>
+    <h1>{t.notFound}</h1>
+    <p>{t.notFoundText}</p>
+    <div class="not-found-actions mono">
+      <a class="hero-cta" href={localeUrl('zh')}>[{t.toHome} ↗]</a>
+      <a class="t-link" href={localeUrl('en')}>[english home ↗]</a>
+    </div>
+  </section>
+</Base>

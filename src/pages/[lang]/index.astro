@@ -1,0 +1,99 @@
+---
+import Base from '../../layouts/Base.astro';
+import Hero from '../../components/Hero.astro';
+import PostList from '../../components/PostList.astro';
+import AsciiArt from '../../components/AsciiArt.astro';
+import Frame from '../../components/Frame.astro';
+import { getPosts, postUrl, formatDate, readingTime } from '../../lib/posts';
+import { labels, languages, localeUrl, otherLang, profile, type Lang } from '../../lib/site';
+
+export function getStaticPaths() {
+  return languages.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Lang;
+const t = labels[lang];
+const posts = await getPosts(lang);
+const selected = posts.filter((p) => p.data.featured).slice(0, 2);
+const tagCount = new Set(posts.flatMap((p) => p.data.tags)).size;
+const heroPosts = posts.map((p) => ({
+  title: p.data.title,
+  url: postUrl(p),
+  date: p.data.date.toISOString().slice(0, 10),
+  tag: p.data.tags[0] || '',
+  min: readingTime(p),
+}));
+const cardPieces = ['pond-ripples', 'ruled-mountains'] as const;
+---
+
+<Base lang={lang} alternate={localeUrl(otherLang(lang))}>
+  <Hero lang={lang} posts={heroPosts} tagCount={tagCount} />
+
+  <div class="home-content">
+  <section id="latest" class="content-shell section panel">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow section-eyebrow mono"><span class="prompt">$</span> ls -t ~/blogs | head -5</span>
+        <h2>{t.latest}<span class="title-dot">.</span></h2>
+      </div>
+      <a class="t-link mono" href={localeUrl(lang, 'writing/')}>[{t.all} ↗]</a>
+    </div>
+    <PostList posts={posts.slice(0, 5)} lang={lang} tree />
+  </section>
+
+  <section id="selected" class="content-shell section panel">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow section-eyebrow mono"><span class="prompt">$</span> ls ~/blogs --featured</span>
+        <h2>{t.selected}<span class="title-dot">.</span></h2>
+      </div>
+      <span class="section-aside mono">{lang === 'zh' ? '// 在想法交汇的地方' : '// where ideas meet'}</span>
+    </div>
+
+    <div class="selected-grid">
+      {selected.map((post, i) => (
+        <a class="selected-card" href={postUrl(post)}>
+          <Frame title={`${String(i + 1).padStart(2, '0')} — ${t.featured}`} right="↗">
+            <div class="card-art" aria-hidden="true">
+              <AsciiArt
+                piece={cardPieces[i % cardPieces.length]}
+                fps={i === 0 ? 16 : 10}
+                mono
+                maxFontSize="11px"
+                class="card-ascii"
+              />
+            </div>
+            <div class="card-copy">
+              <span class="card-category mono">{post.data.tags.map((tag) => `[${tag}]`).join(' ')}</span>
+              <h3>{post.data.title}</h3>
+              <p>{post.data.description}</p>
+              <div class="post-meta mono">
+                <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date, lang)}</time>
+                <span>·</span>
+                <span>{readingTime(post)} {t.min}</span>
+              </div>
+            </div>
+          </Frame>
+        </a>
+      ))}
+    </div>
+  </section>
+
+
+  <section class="content-shell section panel about-section">
+    <Frame right={lang === 'zh' ? '总在进行中' : 'always a work in progress'}>
+      <div class="about-strip">
+        <div class="about-art-wrap" aria-hidden="true">
+          <AsciiArt piece="bonsai" fps={10} mono maxFontSize="10px" class="about-ascii" />
+        </div>
+        <div class="about-strip-body">
+          <span class="eyebrow section-eyebrow mono"><span class="prompt">$</span> cat ~/about/me.md</span>
+          <h2>{t.hello}</h2>
+          <p>{profile.bio[lang]}</p>
+          <a class="t-link mono" href={localeUrl(lang, 'about/')}>[{t.aboutLink} ↗]</a>
+        </div>
+      </div>
+    </Frame>
+  </section>
+  </div>
+</Base>

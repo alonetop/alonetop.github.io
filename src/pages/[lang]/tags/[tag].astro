@@ -1,0 +1,34 @@
+---
+import Base from '../../../layouts/Base.astro';
+import PostList from '../../../components/PostList.astro';
+import AsciiBanner from '../../../components/AsciiBanner.astro';
+import { getPosts } from '../../../lib/posts';
+import { labels, languages, localeUrl, otherLang, type Lang } from '../../../lib/site';
+
+export async function getStaticPaths() {
+  const all = await getPosts();
+  return languages.flatMap((lang) =>
+    [...new Set(all.filter((p) => p.data.lang === lang).flatMap((p) => p.data.tags))].map(
+      (tag) => ({ params: { lang, tag } }),
+    ),
+  );
+}
+
+const lang = Astro.params.lang as Lang;
+const tag = Astro.params.tag!;
+const posts = (await getPosts(lang)).filter((p) => p.data.tags.includes(tag));
+const t = labels[lang];
+---
+
+<Base lang={lang} title={`${t.tags} · ${tag}`} section="tag" alternate={localeUrl(otherLang(lang), 'writing/')}>
+  <section class="content-shell inner-page panel">
+    <a class="back-link mono" href={localeUrl(lang, 'writing/')}>[← {t.back}]</a>
+    <header class="page-heading">
+      <AsciiBanner text="TAGS" font="block" shadow="single" effect="glint" label="TAGS" class="page-banner" />
+      <span class="eyebrow mono">~/tags/{tag} · {String(posts.length).padStart(2, '0')} blogs</span>
+      <h1>#{tag}<span class="title-dot">.</span></h1>
+      <p>{t.tagIntro}</p>
+    </header>
+    <PostList posts={posts} lang={lang} tree />
+  </section>
+</Base>

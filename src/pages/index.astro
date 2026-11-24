@@ -1,0 +1,5 @@
+---
+import { localeUrl } from '../lib/site';
+const destination=localeUrl('zh');
+---
+<!doctype html><html lang="zh" style="background:#090f0e;color:#e4ede9;color-scheme:dark"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width"/><meta http-equiv="refresh" content={`0;url=${destination}`}/><link rel="canonical" href={new URL(destination,Astro.site)}/><title>随记 · Personal Journal</title></head><body><a href={destination}>进入网站 / Enter journal →</a></body></html>

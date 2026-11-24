@@ -1,0 +1,260 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import '../styles/global.css';
+import bootstrap from '../scripts/bootstrap.js?raw';
+import LoadingScreen from '../components/LoadingScreen.astro';
+import AsciiArt from '../components/AsciiArt.astro';
+import { labels, localeUrl, otherLang, profile, url, type Lang } from '../lib/site';
+
+interface Props {
+  lang: Lang;
+  title?: string;
+  description?: string;
+  alternate?: string;
+  section?: string;
+  noindex?: boolean;
+}
+
+const {
+  lang,
+  title,
+  description = profile.bio[lang],
+  alternate,
+  section = 'home',
+  noindex = false,
+} = Astro.props;
+
+const t = labels[lang];
+const canonical = new URL(noindex ? url('404.html') : Astro.url.pathname, Astro.site);
+const alternateUrl = alternate || localeUrl(otherLang(lang));
+const siteTitle = title
+  ? `${title} · ${profile.name[lang]}`
+  : `${profile.name[lang]} · ${lang === 'zh' ? '随记' : 'Blogs, quietly.'}`;
+
+interface PathCrumb {
+  label: string;
+  href?: string;
+}
+
+const basePrefix = import.meta.env.BASE_URL.replace(/\/$/, '');
+const rawPath = Astro.url.pathname.startsWith(basePrefix)
+  ? Astro.url.pathname.slice(basePrefix.length)
+  : Astro.url.pathname;
+const cleanSegments = rawPath
+  .split('/')
+  .filter(Boolean)
+  .map((seg) => decodeURIComponent(seg));
+const routeSegments =
+  cleanSegments[0] === 'zh' || cleanSegments[0] === 'en'
+    ? cleanSegments.slice(1)
+    : cleanSegments;
+
+const pathCrumbs: PathCrumb[] = (() => {
+  if (section === '404') {
+    return [{ label: '~', href: localeUrl(lang) }, { label: '404.html' }];
+  }
+  if (routeSegments.length === 0) {
+    return [{ label: '~/' }];
+  }
+  if (routeSegments[0] === 'posts' && routeSegments.length > 1) {
+    return [
+      { label: '~', href: localeUrl(lang) },
+      { label: 'posts', href: localeUrl(lang, 'writing/') },
+      { label: `${routeSegments.slice(1).join('/')}.md` },
+    ];
+  }
+  if (routeSegments[0] === 'tags' && routeSegments.length > 1) {
+    return [
+      { label: '~', href: localeUrl(lang) },
+      { label: 'tags', href: localeUrl(lang, 'writing/') },
+      { label: `${routeSegments.slice(1).join('/')}/` },
+    ];
+  }
+  return [
+    { label: '~', href: localeUrl(lang) },
+    { label: `${routeSegments.join('/')}/` },
+  ];
+})();
+
+const fontUrl = url('fonts/ascii-rest-mono.woff2');
+const fontFaceCss = `@font-face{font-family:"ascii.rest mono";src:url("${fontUrl}") format("woff2");unicode-range:U+00B0,U+00B7,U+2022,U+2500-259F,U+25CF;font-display:swap;}`;
+// Long runs of box-drawing glyphs for frames and rules, declared once instead of in every element.
+const lineCss = `:root{--hline:"${'─'.repeat(420)}";--dline:"${'═'.repeat(420)}";--vline:"${'│'.repeat(360)}";}`;
+---
+<!doctype html>
+<html lang={lang} data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title>{siteTitle}</title>
+  <meta name="description" content={description} />
+  <link rel="icon" type="image/svg+xml" href={url('favicon.svg')} />
+  <link rel="canonical" href={canonical} />
+  <link rel="alternate" hreflang={lang} href={canonical} />
+  <link rel="alternate" hreflang={otherLang(lang)} href={new URL(alternateUrl, Astro.site)} />
+  <link rel="alternate" type="application/rss+xml" title={t.rss} href={localeUrl(lang, 'rss.xml')} />
+  <meta property="og:type" content={section === 'post' ? 'article' : 'website'} />
+  <meta property="og:title" content={siteTitle} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:image" content={new URL(url('images/share.svg'), Astro.site)} />
+  <meta name="twitter:card" content="summary_large_image" />
+  {noindex && <meta name="robots" content="noindex" />}
+  <ClientRouter />
+  <style is:inline set:html={fontFaceCss}></style>
+  <style is:inline set:html={lineCss}></style>
+  <script is:inline set:html={bootstrap}></script>
+</head>
+<body data-lang={lang} data-section={section}>
+  <div
+    class="site-backdrop"
+    aria-hidden="true"
+    data-pagefind-ignore
+    transition:persist="site-backdrop"
+    transition:animate="none"
+  >
+    <AsciiArt
+      id="site-backdrop"
+      piece="misty-forest"
+      fps={15}
+      cover
+      extend={34}
+      label={lang === 'zh' ? '雾中森林字符画背景' : 'Misty forest ASCII backdrop'}
+    />
+  </div>
+  <div class="intro-host" transition:persist="intro-screen" transition:animate="none">
+    <LoadingScreen lang={lang} />
+  </div>
+  <a class="skip-link mono" href="#main">{lang === 'zh' ? '[跳至正文]' : '[skip to content]'}</a>
+
+  <div
+    class="site-header"
+    data-hero-open={section === 'home' ? 'true' : 'false'}
+    transition:persist={`site-header-${lang}`}
+    transition:animate="none"
+  >
+  <header class="header shell mono">
+    <a class="identity" href={localeUrl(lang)} aria-label={profile.name[lang]}>
+      <span class="brand-symbol" aria-hidden="true">✳</span>
+      <span class="identity-name">{profile.name[lang]}</span>
+    </a>
+
+    <nav class="navigation" aria-label={lang === 'zh' ? '主导航' : 'Main navigation'}>
+      <a href={localeUrl(lang)} aria-current={section === 'home' ? 'page' : undefined}>
+        [{t.home}]
+      </a>
+      <a
+        href={localeUrl(lang, 'writing/')}
+        aria-current={['writing', 'post', 'tag'].includes(section) ? 'page' : undefined}
+      >
+        [{t.writing}]
+      </a>
+      <a href={localeUrl(lang, 'about/')} aria-current={section === 'about' ? 'page' : undefined}>
+        [{t.about}]
+      </a>
+    </nav>
+
+    <div class="header-tools">
+      <button
+        type="button"
+        class="t-btn search-open"
+        aria-label={t.search}
+        title={`${t.search} (/ or ⌘K)`}
+      >
+        [{t.searchShort} /]
+      </button>
+      <a
+        class="t-btn language-switch"
+        href={alternateUrl}
+        lang={otherLang(lang)}
+        aria-label={lang === 'zh' ? '当前中文，点击切换到 English' : 'Current English, click to switch to 中文'}
+        title={lang === 'zh' ? '切换到 English' : 'Switch to 中文'}
+      >
+        [{lang === 'zh' ? '中' : 'EN'}]
+      </a>
+      <button
+        type="button"
+        class="t-btn backdrop-ink"
+        data-ascii-mono-for="site-backdrop"
+        aria-pressed="false"
+        title={lang === 'zh' ? '背景色彩模式（点击切换）' : 'Backdrop colour mode (click to toggle)'}
+      >
+        [colour]
+      </button>
+      <button
+        type="button"
+        class="t-btn motion-toggle"
+        data-motion-toggle
+        data-play={t.playAnyway}
+        data-still={t.holdStill}
+        hidden
+      >
+        {t.playAnyway}
+      </button>
+    </div>
+  </header>
+  </div>
+
+  <main id="main" transition:name="main-content"><slot /></main>
+
+  <div class="site-footer">
+    <footer class="footer shell mono">
+      <nav class="footer-path" aria-label={lang === 'zh' ? '当前页面路径' : 'Current path'}>
+        {pathCrumbs.map((crumb, index) => (
+          <>
+            {index > 0 && <span class="footer-slash" aria-hidden="true">/</span>}
+            {crumb.href ? (
+              <a class="footer-crumb" href={crumb.href}>{crumb.label}</a>
+            ) : (
+              <span class="footer-current" aria-current="page">{crumb.label}</span>
+            )}
+          </>
+        ))}
+      </nav>
+      <div class="footer-right">
+        <a class="t-link" href={localeUrl(lang, 'rss.xml')}>[rss ↗]</a>
+        <span class="footer-sep" aria-hidden="true">·</span>
+        <span>© {new Date().getFullYear()}</span>
+      </div>
+    </footer>
+  </div>
+
+  <dialog id="search-dialog" aria-labelledby="search-heading" data-base={url('pagefind/')}>
+    <div class="search-top mono">
+      <h2 id="search-heading">~/search · {t.search}</h2>
+      <button type="button" class="t-btn search-close" aria-label={t.close}>[esc]</button>
+    </div>
+    <div class="search-input-wrap mono">
+      <span class="search-prompt" aria-hidden="true">&gt;</span>
+      <label class="sr-only" for="search-input">{t.search}</label>
+      <input id="search-input" type="search" placeholder={t.searchHint} autocomplete="off" />
+      <span class="search-key" aria-hidden="true">/</span>
+    </div>
+    <div
+      id="search-status"
+      class="mono"
+      role="status"
+      data-start={t.searchStart}
+      data-loading={t.searchLoading}
+      data-empty={t.searchEmpty}
+      data-error={t.searchError}
+    >
+      {t.searchStart}
+    </div>
+    <ol id="search-results"></ol>
+    <div class="search-bottom mono">
+      <span>{t.searchKeys}</span>
+      <a class="t-link" href={localeUrl(lang, 'writing/')}>[{t.all} ↗]</a>
+    </div>
+    <noscript><p class="mono search-noscript">{t.searchUnavailable}</p></noscript>
+  </dialog>
+
+  <script>
+    import '../scripts/intro';
+    import '../scripts/site';
+    import '../scripts/ascii-runtime';
+    import '../scripts/keyboard-nav';
+  </script>
+</body>
+</html>

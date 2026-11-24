@@ -1,0 +1,204 @@
+---
+import AsciiArt from './AsciiArt.astro';
+import { labels, localeUrl, profile, type Lang } from '../lib/site';
+
+interface HeroPostItem {
+  title: string;
+  url: string;
+  date: string;
+  tag: string;
+  min: number;
+}
+
+interface Props {
+  lang: Lang;
+  posts?: HeroPostItem[];
+  tagCount?: number;
+}
+
+const { lang, posts = [], tagCount = 0 } = Astro.props;
+const t = labels[lang];
+const recentPosts = posts.slice(0, 3);
+const postsJson = JSON.stringify(posts);
+---
+
+<section class="hero-full" data-hero>
+  <div class="hero-overlay">
+    <div
+      class="frame hero-window crt-window"
+      data-hero-terminal
+      data-lang={lang}
+      data-term-posts={postsJson}
+      data-writing-url={localeUrl(lang, 'writing/')}
+      data-about-url={localeUrl(lang, 'about/')}
+      data-bio={profile.bio[lang]}
+      data-user={profile.name[lang]}
+    >
+      <div class="frame-line frame-top" data-pagefind-ignore>
+        <span aria-hidden="true">┌─</span>
+        <span class="frame-title"> ~/blogs — zsh </span>
+        <span class="frame-fill" aria-hidden="true"></span>
+        <span class="term-controls mono" role="group" aria-label={lang === 'zh' ? '终端窗口控制' : 'Terminal controls'}>
+          <button
+            type="button"
+            class="term-ctl"
+            data-term-replay
+            title={lang === 'zh' ? '重播终端动画' : 'Replay terminal animation'}
+            aria-label={lang === 'zh' ? '重播终端动画' : 'Replay terminal animation'}
+          >[↻]</button>
+          <button
+            type="button"
+            class="term-ctl"
+            data-term-min
+            aria-pressed="false"
+            title={lang === 'zh' ? '折叠窗口欣赏森林' : 'Minimize window'}
+            aria-label={lang === 'zh' ? '折叠窗口' : 'Minimize window'}
+          >[−]</button>
+          <button
+            type="button"
+            class="term-ctl"
+            data-term-wide
+            aria-pressed="false"
+            title={lang === 'zh' ? '切换宽屏终端' : 'Toggle wide terminal'}
+            aria-label={lang === 'zh' ? '切换宽屏终端' : 'Toggle wide terminal'}
+          >[□]</button>
+        </span>
+        <span aria-hidden="true">─┐</span>
+      </div>
+
+      <div class="frame-body hero-window-body">
+        <div class="crt-scanlines" aria-hidden="true"></div>
+
+        <div class="term-intro-blocks" data-term-intro>
+        <!-- 1. $ neofetch --minimal -->
+        <p class="term-line mono" data-term-step="cmd1">
+          <span class="prompt">$</span>
+          <span data-term-type="neofetch --minimal">neofetch --minimal</span>
+        </p>
+
+        <div class="neofetch-grid mono" data-term-step="out1">
+          <div class="neofetch-art" aria-hidden="true">
+            <AsciiArt
+              piece="donut"
+              fps={18}
+              mono
+              maxFontSize="7px"
+              label="Spinning ASCII donut"
+              class="neofetch-donut"
+            />
+          </div>
+          <div class="neofetch-info">
+            <div class="nf-head">{profile.name[lang]}<span class="nf-at">@</span>blogs</div>
+            <div class="nf-sep" aria-hidden="true">──────────────────────</div>
+            <div class="nf-row"><span class="nf-key">blogs</span><span class="nf-val">{String(posts.length).padStart(2, '0')} published</span></div>
+            <div class="nf-row"><span class="nf-key">topics</span><span class="nf-val">{String(tagCount).padStart(2, '0')} tags</span></div>
+            <div class="nf-row"><span class="nf-key">scene</span><span class="nf-val">misty-forest · 200×100</span></div>
+            <div class="nf-row"><span class="nf-key">shell</span><span class="nf-val">zsh · astro-7 · tty0</span></div>
+            <div class="nf-row">
+              <span class="nf-key">clock</span>
+              <time class="nf-val term-clock" data-term-clock>--:--:--</time>
+            </div>
+            <div class="nf-swatches" aria-hidden="true">
+              <span style="background:#0f1816"></span>
+              <span style="background:#2d5a4c"></span>
+              <span style="background:#5a9a86"></span>
+              <span style="background:#8ec5b9"></span>
+              <span style="background:#f2cf88"></span>
+              <span style="background:#d99b52"></span>
+              <span style="background:#789189"></span>
+              <span style="background:#e4ede9"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. $ cat ./manifesto.txt -->
+        <p class="term-line mono" data-term-step="cmd2">
+          <span class="prompt">$</span>
+          <span data-term-type="cat ./manifesto.txt">cat ./manifesto.txt</span>
+        </p>
+
+        <div class="term-manifesto" data-term-step="title">
+          <h1 class="term-heading">
+            {
+              lang === 'zh' ? (
+                <><span class="hero-accent" data-term-decode="深">深</span><span data-term-decode="度，">度，</span><span class="hero-accent" data-term-decode="广">广</span><span data-term-decode="度，">度，</span><span class="hero-accent" data-term-decode="高">高</span><span data-term-decode="度。">度。</span></>
+              ) : (
+                <><span class="hero-accent" data-term-decode="D">D</span><span data-term-decode="eep. ">eep. </span><span class="hero-accent" data-term-decode="W">W</span><span data-term-decode="ide. ">ide. </span><span class="hero-accent" data-term-decode="H">H</span><span data-term-decode="igh.">igh.</span></>
+              )
+            }
+          </h1>
+          <p class="hero-description">
+            {
+              lang === 'zh'
+                ? '关于技术、设计，以及生活的细枝末节。用文字整理思绪，用好奇连接世界。'
+                : 'On technology, design, and the everyday. A place to think out loud and stay curious.'
+            }
+          </p>
+        </div>
+
+        <!-- 3. $ ls -lt ~/posts | head -3 -->
+        <div data-term-step="body">
+          <p class="term-line mono">
+            <span class="prompt">$</span>
+            <span>ls -lt ~/posts | head -3</span>
+          </p>
+          <ul class="term-ls mono">
+            {recentPosts.map((post, idx) => (
+              <li>
+                <a class="term-ls-link" href={post.url}>
+                  <span class="term-ls-idx">[{idx + 1}]</span>
+                  <span class="term-ls-date">{post.date}</span>
+                  <span class="term-ls-title">{post.title}</span>
+                  <span class="term-ls-arrow" aria-hidden="true">↗</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+        </div>
+
+        <!-- 4. Interactive shell history & live prompt -->
+        <div data-term-step="body">
+          <div class="term-history mono" data-term-history aria-live="polite"></div>
+
+          <form class="term-input-row mono" data-term-form>
+            <span class="prompt" aria-hidden="true">$</span>
+            <label class="sr-only" for="hero-shell-input">
+              {lang === 'zh' ? '输入终端命令' : 'Enter terminal command'}
+            </label>
+            <input
+              id="hero-shell-input"
+              class="term-input"
+              data-term-input
+              type="text"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              placeholder={lang === 'zh' ? '输入 help 查看命令，或点击下方命令…' : 'type help, or click a command below…'}
+            />
+          </form>
+
+          <div class="term-hints mono" data-pagefind-ignore>
+            <button type="button" class="term-chip" data-term-cmd="help">[help]</button>
+            <button type="button" class="term-chip" data-term-cmd="ls">[ls]</button>
+            <button type="button" class="term-chip" data-term-cmd="open 1">[open 1]</button>
+            <button type="button" class="term-chip" data-term-cmd="about">[about]</button>
+            <button type="button" class="term-chip" data-term-cmd="search">[search]</button>
+            <button type="button" class="term-chip" data-term-cmd="mono">[mono]</button>
+            <button type="button" class="term-chip" data-term-cmd="clear">[clear]</button>
+            <button type="button" class="term-chip term-chip-reset" data-term-cmd="reset" data-term-reset-chip hidden>[reset]</button>
+            <a class="term-chip term-chip-explore" href="#latest">[↓ {t.explore}]</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame-line frame-bottom" aria-hidden="true" data-pagefind-ignore>
+        <span>└</span><span class="frame-fill"></span><span>┘</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import '../scripts/hero-terminal';
+</script>

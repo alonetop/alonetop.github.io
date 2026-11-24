@@ -1,0 +1,143 @@
+---
+import { canvas as canvasPieces, isPiece, load, type Piece, type PieceName } from 'ascii.rest';
+import { extendPiece } from '../lib/extend-piece';
+
+interface Props {
+  piece: PieceName;
+  fps?: number;
+  mono?: boolean;
+  label?: string;
+  options?: Record<string, unknown>;
+  caption?: string;
+  allowMonoToggle?: boolean;
+  scenes?: PieceName[];
+  class?: string;
+  interactive?: boolean;
+  maxFontSize?: string;
+  /** Fill the parent completely, like background-size: cover. */
+  cover?: boolean;
+  id?: string;
+  /** Generated rows added above and below the scene (backdrop panorama). */
+  extend?: number;
+}
+
+const {
+  piece,
+  fps,
+  mono = false,
+  label,
+  options = {},
+  caption,
+  allowMonoToggle = false,
+  scenes,
+  class: className,
+  maxFontSize,
+  cover = false,
+  id,
+  extend = 0,
+} = Astro.props;
+
+if (!isPiece(piece)) {
+  throw new Error(`AsciiArt: unknown piece "${piece}"`);
+}
+
+const baseMod: Piece = await load[piece]();
+const sceneRows = baseMod.meta.rows ?? 20;
+const mod: Piece = extend > 0 ? extendPiece(baseMod, extend) : baseMod;
+const { meta } = mod;
+const isColoured = canvasPieces.has(piece);
+const cols = meta.cols ?? 64;
+const rows = meta.rows ?? 20;
+const cell = meta.cell ?? 2;
+const ground = meta.ground;
+const stillTime = meta.still ?? 0;
+const mergedOptions = { ...meta.options, ...options };
+
+// Render dark-mode first frame at build time for zero-flash SSR.
+const renderFrame = mod.default(mergedOptions);
+const ssrInk = renderFrame(stillTime, { paper: false });
+
+const optionsJson = Object.keys(options).length ? JSON.stringify(options) : undefined;
+const sceneList = scenes?.length ? scenes : undefined;
+const effectiveFps = fps ?? meta.fps ?? 15;
+const showToolbar = Boolean(caption || allowMonoToggle || (sceneList && sceneList.length > 1));
+const inlineStyle = [
+  `--cols:${cols}`,
+  `--rows:${rows}`,
+  `--cell:${cell}`,
+  `--scene-rows:${sceneRows}`,
+  ground ? `--ground:${ground}` : '',
+  maxFontSize ? `--ascii-max-fs:${maxFontSize}` : '',
+]
+  .filter(Boolean)
+  .join(';');
+---
+
+<figure
+  id={id}
+  class:list={['ascii-well', { 'is-scene': isColoured && !mono, 'is-cover': cover }, className]}
+  style={inlineStyle}
+  data-ascii-root
+  data-ascii-cover={cover ? 'true' : undefined}
+  data-ascii-piece={piece}
+  data-ascii-fps={effectiveFps}
+  data-ascii-mono={mono ? 'true' : 'false'}
+  data-ascii-coloured={isColoured ? 'true' : 'false'}
+  data-ascii-options={optionsJson}
+  data-ascii-label={label ?? meta.name}
+  data-ascii-scenes={sceneList ? sceneList.join(',') : undefined}
+  data-ascii-extend={extend > 0 ? String(extend) : undefined}
+  data-pagefind-ignore
+>
+  <div
+    class="ascii-stage-box"
+    role="img"
+    aria-label={label ?? meta.name}
+    data-ascii-stage
+  >
+    {
+      isColoured && !mono ? (
+        <div class="ascii-scene-placeholder" aria-hidden="true">
+          <pre class="ascii-stage ascii-ssr-fallback">{ssrInk}</pre>
+        </div>
+      ) : (
+        <pre class="ascii-stage ascii-ssr-ink">{ssrInk}</pre>
+      )
+    }
+  </div>
+  {
+    showToolbar && (
+      <figcaption class="ascii-bar mono">
+        <span class="ascii-meta" data-ascii-meta>
+          {caption ?? `${meta.name} · ${cols}×${rows}`}
+        </span>
+        <span class="ascii-controls">
+          {sceneList && sceneList.length > 1 && (
+            <span class="ascii-scene-tabs" role="group" aria-label="Scene switcher">
+              {sceneList.map((sceneName) => (
+                <button
+                  type="button"
+                  class="t-btn ascii-scene-btn"
+                  data-ascii-scene-pick={sceneName}
+                  aria-pressed={sceneName === piece ? 'true' : 'false'}
+                >
+                  [{sceneName}]
+                </button>
+              ))}
+            </span>
+          )}
+          {allowMonoToggle && isColoured && (
+            <button
+              type="button"
+              class="t-btn ascii-mono-btn"
+              data-ascii-mono-toggle
+              aria-pressed={mono ? 'true' : 'false'}
+            >
+              {mono ? '[mono]' : '[colour]'}
+            </button>
+          )}
+        </span>
+      </figcaption>
+    )
+  }
+</figure>

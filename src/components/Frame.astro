@@ -1,0 +1,19 @@
+---
+interface Props {
+  title?: string;
+  right?: string;
+  class?: string;
+}
+
+const { title, right, class: className } = Astro.props;
+---
+
+<div class:list={['frame', className]}>
+  <div class="frame-line frame-top" aria-hidden="true" data-pagefind-ignore>
+    <span>┌─</span>{title && <span class="frame-title">{` ${title} `}</span>}<span class="frame-fill"></span>{right && <span class="frame-title frame-right">{` ${right} `}</span>}<span>─┐</span>
+  </div>
+  <div class="frame-body"><slot /></div>
+  <div class="frame-line frame-bottom" aria-hidden="true" data-pagefind-ignore>
+    <span>└</span><span class="frame-fill"></span><span>┘</span>
+  </div>
+</div>

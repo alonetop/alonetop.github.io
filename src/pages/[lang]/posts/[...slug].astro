@@ -1,0 +1,123 @@
+---
+import { render } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import { getPosts, slug, postUrl, tagUrl, formatDate, readingTime, type Post } from '../../../lib/posts';
+import { labels, localeUrl, otherLang } from '../../../lib/site';
+
+export async function getStaticPaths() {
+  return (await getPosts()).map((post) => ({
+    params: { lang: post.data.lang, slug: slug(post) },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const lang = post.data.lang;
+const t = labels[lang];
+const { Content, headings } = await render(post);
+const all = await getPosts();
+const translation = all.find(
+  (p) => p.data.lang !== lang && p.data.translationKey === post.data.translationKey,
+);
+const posts = all.filter((p) => p.data.lang === lang);
+const index = posts.findIndex((p) => p.id === post.id);
+const previous = posts[index + 1];
+const next = posts[index - 1];
+---
+
+<Base
+  lang={lang}
+  title={post.data.title}
+  description={post.data.description}
+  section="post"
+  alternate={translation ? postUrl(translation) : localeUrl(otherLang(lang), 'writing/')}
+>
+  <div class="reading-progress" aria-hidden="true"></div>
+
+  <article class="content-shell article-page panel" data-pagefind-body>
+    <a class="back-link mono" href={localeUrl(lang, 'writing/')} data-pagefind-ignore>
+      [← {t.back}]
+    </a>
+
+    <header class="article-header">
+      <div class="eyebrow mono">
+        ~/posts/{slug(post)} · {post.data.tags.map((tag) => `[${tag}]`).join(' ')}
+      </div>
+      <h1 data-pagefind-meta="title">{post.data.title}</h1>
+      <p class="article-deck">{post.data.description}</p>
+      <div class="post-meta mono">
+        <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date, lang)}</time>
+        <span>·</span>
+        <span>{readingTime(post)} {t.min}</span>
+        {post.data.demo && <span class="sample-label">[{t.sample}]</span>}
+      </div>
+    </header>
+
+    {post.data.demo && (
+      <aside class="demo-note mono" data-pagefind-ignore>
+        // {t.sampleNote}
+      </aside>
+    )}
+
+    <div class="article-layout">
+      <div
+        class="prose"
+        id="article-content"
+        data-copy={t.copy}
+        data-copied={t.copied}
+        data-copy-error={t.copyError}
+      >
+        <Content />
+      </div>
+
+      <aside class="toc mono" data-pagefind-ignore>
+        <span class="eyebrow">toc / {t.contents}</span>
+        <nav aria-label={t.contents}>
+          {headings
+            .filter((h) => h.depth <= 3)
+            .map((h) => (
+              <a href={`#${h.slug}`} class:list={[{ 'toc-sub': h.depth === 3 }]}>
+                <span class="toc-branch" aria-hidden="true">{h.depth === 3 ? '  ├─' : '├─'}</span>
+                <span>{h.text}</span>
+              </a>
+            ))}
+        </nav>
+      </aside>
+    </div>
+
+    <div class="article-tags mono" data-pagefind-ignore>
+      {post.data.tags.map((tag) => (
+        <a class="tag-chip" href={tagUrl(lang, tag)}>
+          [#{tag}]
+        </a>
+      ))}
+    </div>
+
+    <nav
+      class="post-pagination"
+      aria-label={lang === 'zh' ? '相邻文章' : 'Adjacent articles'}
+      data-pagefind-ignore
+    >
+      <div>
+        {previous && (
+          <a href={postUrl(previous)}>
+            <span class="mono">[↙ {t.previous}]</span>
+            <strong>{previous.data.title}</strong>
+          </a>
+        )}
+      </div>
+      <div>
+        {next && (
+          <a href={postUrl(next)}>
+            <span class="mono">[{t.next} ↗]</span>
+            <strong>{next.data.title}</strong>
+          </a>
+        )}
+      </div>
+    </nav>
+  </article>
+</Base>

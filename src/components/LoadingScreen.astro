@@ -1,0 +1,29 @@
+---
+import { profile, type Lang } from '../lib/site';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+---
+
+<div id="intro-screen" class="intro-screen" aria-hidden="true" data-pagefind-ignore>
+  <div class="intro-terminal mono">
+    <div class="intro-brand">
+      <span class="intro-sigil">✳</span>
+      <span>{profile.name[lang]}</span>
+    </div>
+    <div class="intro-bar-row" aria-hidden="true">
+      <span class="intro-bracket">[</span><span id="intro-bar-fill" class="intro-bar-fill">████</span><span id="intro-bar-rest" class="intro-bar-rest">░░░░░░░░░░░░░░░░░░░░</span><span class="intro-bracket">]</span>
+      <span id="intro-pct" class="intro-pct"> 16%</span>
+    </div>
+    <div
+      id="intro-status"
+      class="intro-status"
+      data-ready={lang === 'zh' ? '就绪 · ascii surface ready.' : 'ready · ascii surface mounted.'}
+    >
+      {lang === 'zh' ? '正在载入字符画布…' : 'initializing ascii surface…'}
+    </div>
+  </div>
+</div>
