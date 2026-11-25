@@ -211,6 +211,12 @@ img {
   pointer-events: none;
   background: linear-gradient(
     to bottom,
+    rgba(9, 15, 14, 0.92) 0%,
+    rgba(9, 15, 14, 0.56) 58%,
+    transparent 100%
+  );
+  background: linear-gradient(
+    to bottom,
     color-mix(in srgb, var(--bg) 92%, transparent) 0%,
     color-mix(in srgb, var(--bg) 56%, transparent) 58%,
     transparent 100%
@@ -338,6 +344,7 @@ img {
   font-size: 1.1rem;
   letter-spacing: 0.02em;
   color: var(--ink);
+  text-shadow: 0 0 6px rgba(242, 207, 136, 0.35);
   text-shadow: 0 0 6px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
@@ -346,6 +353,9 @@ img {
   color: var(--accent);
   background: transparent;
   text-shadow:
+    0 0 6px rgba(242, 207, 136, 0.75),
+    0 0 18px rgba(242, 207, 136, 0.45);
+  text-shadow:
     0 0 6px color-mix(in srgb, var(--accent) 75%, transparent),
     0 0 18px color-mix(in srgb, var(--accent) 45%, transparent);
 }
@@ -353,6 +363,10 @@ img {
 .site-header[data-hero-open="true"] .navigation a[aria-current="page"] {
   color: var(--accent);
   background: transparent;
+  text-shadow:
+    0 0 4px rgba(242, 207, 136, 0.9),
+    0 0 14px rgba(242, 207, 136, 0.6),
+    0 0 30px rgba(242, 207, 136, 0.3);
   text-shadow:
     0 0 4px color-mix(in srgb, var(--accent) 90%, transparent),
     0 0 14px color-mix(in srgb, var(--accent) 60%, transparent),
@@ -433,6 +447,7 @@ html:not([data-intro="pending"]) .site-header[data-hero-open="true"]:not([data-i
   margin: 0;
   padding: 0;
   font-family: var(--art);
+  font-size: var(--ascii-max-fs, 13px);
   font-size: min(var(--ascii-max-fs, 13px), calc(96cqi / var(--cols, 64) / 0.6));
   line-height: calc(0.6 * var(--cell, 2));
   letter-spacing: 0;
@@ -442,6 +457,7 @@ html:not([data-intro="pending"]) .site-header[data-hero-open="true"]:not([data-i
 }
 
 .ascii-well.is-scene .ascii-stage {
+  font-size: calc(100vw / var(--cols, 200) / 0.6);
   font-size: calc(100cqi / var(--cols, 200) / 0.6);
   line-height: calc(0.6 * var(--cell, 1));
 }
@@ -838,6 +854,7 @@ html[lang="en"] .term-heading {
 }
 
 .term-input-row:focus-within {
+  border-bottom-color: rgba(242, 207, 136, 0.62);
   border-bottom-color: color-mix(in srgb, var(--accent) 62%, transparent);
 }
 
@@ -1053,6 +1070,7 @@ html[lang="en"] .hero-description {
   padding: 4px 1.1ch;
   background: var(--accent-soft);
   color: var(--accent);
+  border: 1px solid rgba(242, 207, 136, 0.45);
   border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
   font-weight: 500;
   transition: background-color 0.16s, color 0.16s, border-color 0.16s;
@@ -1356,6 +1374,12 @@ html[lang="en"] .post-row h3 {
   margin-top: auto;
   display: flex;
   align-items: flex-end;
+  background: linear-gradient(
+    to top,
+    rgba(9, 15, 14, 0.96) 0%,
+    rgba(9, 15, 14, 0.68) 60%,
+    transparent 100%
+  );
   background: linear-gradient(
     to top,
     color-mix(in srgb, var(--bg) 96%, transparent) 0%,
@@ -2556,9 +2580,10 @@ body > main {
 
 /* Frosted forest-glass reading surfaces: the forest glows softly through margins and panels. */
 .panel {
+  background: rgba(9, 15, 14, 0.82);
   background: color-mix(in srgb, var(--bg) 82%, transparent);
-  backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   padding-inline: clamp(16px, 3vw, 36px);
   margin-block: 40px;
   border: 1px solid var(--line);
@@ -2566,6 +2591,7 @@ body > main {
 
 .article-page.panel,
 .inner-page.panel {
+  background: rgba(9, 15, 14, 0.89);
   background: color-mix(in srgb, var(--bg) 89%, transparent);
 }
 
@@ -2576,8 +2602,8 @@ body > main {
 
 .about-section.panel {
   background: transparent;
-  backdrop-filter: none;
   -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   border: 0;
   padding-inline: 0;
 }
@@ -2589,9 +2615,10 @@ body > main {
   position: relative;
   min-width: 0;
   max-width: 100%;
+  background: rgba(9, 15, 14, 0.76);
   background: color-mix(in srgb, var(--bg) 76%, transparent);
-  backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   color: var(--text);
 }
 
@@ -2680,6 +2707,7 @@ body > main {
 .selected-card:hover .frame,
 .selected-card:focus-visible .frame {
   --frame-c: var(--accent);
+  background: rgba(21, 34, 31, 0.84);
   background: color-mix(in srgb, var(--well-hover) 84%, transparent);
 }
 
