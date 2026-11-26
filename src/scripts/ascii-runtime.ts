@@ -64,9 +64,15 @@ function fitPreToBox(stage: HTMLElement): void {
   if (!preW || !preH) return;
   if (preW > boxW + 1 || preH > boxH + 1) {
     const scale = Math.min(boxW / preW, boxH / preH) * 0.96;
+    pre.style.position = "absolute";
+    pre.style.left = "50%";
+    pre.style.top = "50%";
     pre.style.transformOrigin = "center center";
-    pre.style.transform = `scale(${scale.toFixed(4)})`;
-  } else if (pre.style.transform) {
+    pre.style.transform = `translate(-50%, -50%) scale(${scale.toFixed(4)})`;
+  } else if (pre.style.transform || pre.style.position) {
+    pre.style.position = "";
+    pre.style.left = "";
+    pre.style.top = "";
     pre.style.transform = "";
     pre.style.transformOrigin = "";
   }
