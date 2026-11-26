@@ -521,12 +521,17 @@ function initHeroTerminal(): void {
     const applyHeroVisual = (): void => {
       const heroH = Math.max(320, heroSection.offsetHeight || window.innerHeight);
       const p = Math.max(0, Math.min(1, window.scrollY / (heroH * 0.65)));
-      const smooth = p * p * (3 - 2 * p);
-      const opacity = 1 - smooth;
-      heroOverlay.style.opacity = opacity.toFixed(3);
-      heroOverlay.style.transform = reduced.matches
-        ? "none"
-        : `translateY(${(-96 * smooth).toFixed(1)}px) scale(${(1 - 0.03 * smooth).toFixed(4)})`;
+      if (p <= 0.001) {
+        heroOverlay.style.opacity = "";
+        heroOverlay.style.transform = "";
+      } else {
+        const smooth = p * p * (3 - 2 * p);
+        const opacity = 1 - smooth;
+        heroOverlay.style.opacity = opacity.toFixed(3);
+        heroOverlay.style.transform = reduced.matches
+          ? "none"
+          : `translateY(${(-96 * smooth).toFixed(1)}px) scale(${(1 - 0.03 * smooth).toFixed(4)})`;
+      }
       heroSection.style.pointerEvents = p > 0.72 ? "none" : "";
       heroDismissed = p >= 0.72;
     };

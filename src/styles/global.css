@@ -512,7 +512,6 @@ html:not([data-intro="pending"]) .site-header[data-hero-open="true"]:not([data-i
   width: min(1160px, calc(100% - 48px));
   margin-inline: auto;
   transform-origin: center center;
-  will-change: opacity, transform;
 }
 
 .home-content {
@@ -2620,6 +2619,11 @@ body > main {
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   color: var(--text);
+}
+
+html.is-edge .frame {
+  background: rgba(9, 15, 14, 0.88);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
 }
 
 .frame-line {

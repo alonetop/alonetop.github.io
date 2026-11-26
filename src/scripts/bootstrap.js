@@ -2,6 +2,9 @@
 (() => {
   const root = document.documentElement;
   root.classList.add("js");
+  if (/\bEdg\//.test(navigator.userAgent)) {
+    root.classList.add("is-edge");
+  }
   root.dataset.theme = "dark";
 
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");

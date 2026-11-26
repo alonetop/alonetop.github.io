@@ -53,6 +53,25 @@ function writeStore(key: string, value: string): void {
 
 const getMotionOverride = () => readStore(MOTION_KEY) === "play";
 
+function fitPreToBox(stage: HTMLElement): void {
+  const pre = stage.querySelector<HTMLPreElement>("pre.ascii-stage");
+  if (!pre) return;
+  const boxW = stage.clientWidth;
+  const boxH = stage.clientHeight;
+  if (!boxW || !boxH) return;
+  const preW = pre.scrollWidth;
+  const preH = pre.scrollHeight;
+  if (!preW || !preH) return;
+  if (preW > boxW + 1 || preH > boxH + 1) {
+    const scale = Math.min(boxW / preW, boxH / preH) * 0.96;
+    pre.style.transformOrigin = "center center";
+    pre.style.transform = `scale(${scale.toFixed(4)})`;
+  } else if (pre.style.transform) {
+    pre.style.transform = "";
+    pre.style.transformOrigin = "";
+  }
+}
+
 function syncMotionButtons(): void {
   const override = getMotionOverride();
   document
@@ -153,6 +172,10 @@ function setupAsciiWell(container: HTMLElement): void {
     ro = new ResizeObserver(fitCover);
     ro.observe(container);
     fitCover();
+  } else {
+    ro = new ResizeObserver(() => fitPreToBox(stage!));
+    ro.observe(stage);
+    fitPreToBox(stage);
   }
 
   function getMonoButtons(): HTMLButtonElement[] {
@@ -262,6 +285,10 @@ function setupAsciiWell(container: HTMLElement): void {
       fps: cappedFps,
       motion: getMotionOverride(),
     });
+    if (!cover && !useCanvas) {
+      fitPreToBox(stage!);
+      requestAnimationFrame(() => fitPreToBox(stage!));
+    }
     active = true;
   }
 
@@ -332,6 +359,9 @@ function setupAsciiBanner(container: HTMLElement): void {
   let stopCurrent: (() => void) | null = null;
   let active = false;
   let io: IntersectionObserver | null = null;
+  const ro = new ResizeObserver(() => fitPreToBox(stage!));
+  ro.observe(stage);
+  fitPreToBox(stage);
 
   async function renderBanner(): Promise<void> {
     const { banner } = await import("ascii.rest/banner");
@@ -343,6 +373,8 @@ function setupAsciiBanner(container: HTMLElement): void {
     stopCurrent?.();
     stage!.replaceChildren(pre);
     stopCurrent = mount(pre, piece, { motion: getMotionOverride() });
+    fitPreToBox(stage!);
+    requestAnimationFrame(() => fitPreToBox(stage!));
     active = true;
   }
 
@@ -353,6 +385,7 @@ function setupAsciiBanner(container: HTMLElement): void {
     },
     stop: () => {
       io?.disconnect();
+      ro.disconnect();
       stopCurrent?.();
       stopCurrent = null;
       active = false;
